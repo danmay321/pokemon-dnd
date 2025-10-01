@@ -1,10 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 
 export default function App() {
   const [party, setParty] = useState<string[]>(["Bulbasaur", "Charmander"]);
   const [name, setName] = useState("");
   const [currentPage, setCurrentPage] = useState("rules");
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('theme') : null;
+    if (stored === 'light' || stored === 'dark') setTheme(stored);
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('theme', theme);
+    } catch {}
+  }, [theme]);
 
   const add = () => {
     if (!name.trim()) return;
@@ -12,22 +24,64 @@ export default function App() {
     setName("");
   };
 
+  const rootBg = theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-gray-100 text-slate-900';
+  const headerBg = theme === 'dark' ? 'bg-slate-950/70 border-white/10' : 'bg-white/80 border-black/10';
+  const sectionClass = (theme === 'dark')
+    ? 'rounded-2xl border border-white/10 p-6 bg-white/5 transition-colors duration-300'
+    : 'rounded-2xl border border-black/10 p-6 bg-white transition-colors duration-300';
+
+  const cardClass = (theme === 'dark')
+    ? 'rounded-xl border border-white/10 p-4 bg-black/20 hover:bg-black/30 transition-colors duration-300 cursor-pointer'
+    : 'rounded-xl border border-black/10 p-4 bg-white hover:bg-gray-50 transition-colors duration-300 cursor-pointer';
+
+  const backButtonClass = theme === 'dark'
+    ? 'rounded-xl px-3 py-1 font-semibold bg-white/10 text-slate-100 hover:bg-white/20'
+    : 'rounded-xl px-3 py-1 font-semibold bg-gray-200 text-slate-900 hover:bg-gray-300';
+
+  const toggleButtonClass = theme === 'dark'
+    ? 'rounded-xl px-3 py-1 text-sm bg-white/10 hover:bg-white/20 flex items-center gap-2'
+    : 'rounded-xl px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 flex items-center gap-2';
+
   return (
-    <div className="min-h-dvh bg-slate-950 text-slate-100">
-      <Sidebar onNavigate={setCurrentPage} />
-      <header className="border-b border-white/10 sticky top-0 backdrop-blur bg-slate-950/70 ml-64">
+    <div className={`min-h-dvh ${rootBg}`}>
+      <Sidebar onNavigate={setCurrentPage} theme={theme} />
+      <header className={`sticky top-0 backdrop-blur ml-64 ${headerBg}`}>
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold tracking-tight">
             <span className="text-[hsl(var(--brand))]">Pokémon</span> DnD
           </h1>
-          <span className="text-sm opacity-75">v0.1</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className={toggleButtonClass}
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? (
+                <> 
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                    <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5" />
+                    <path stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                  </svg>
+                  Light
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Dark
+                </>
+              )}
+            </button>
+            <span className="text-sm opacity-75">v0.1</span>
+          </div>
         </div>
       </header>
       
       <main className="ml-64">
         <div className="max-w-5xl mx-auto px-4 py-8 grid gap-6">
           {currentPage === 'rules' ? (
-            <section className="rounded-2xl border border-white/10 p-6 bg-white/5">
+            <section className={sectionClass}>
               <h2 className="text-xl font-semibold mb-3">Game Rules</h2>
               <p className="opacity-80 mb-4">Basic rules and guidelines for playing Pokémon in a D&D setting.</p>
 
@@ -42,28 +96,28 @@ export default function App() {
                     tabIndex={0}
                     onClick={() => setCurrentPage(`rule:${r.id}`)}
                     onKeyDown={(e) => e.key === 'Enter' && setCurrentPage(`rule:${r.id}`)}
-                    className="rounded-xl border border-white/10 p-4 bg-black/20 hover:bg-black/30 transition-colors cursor-pointer"
+                    className={cardClass}
                   >
                     <h3 className="font-medium">{r.title}</h3>
                   </div>
                 ))}
               </div>
-              </section>
-            ) : currentPage.startsWith('rule:') ? (
-              <section className="rounded-2xl border border-white/10 p-6 bg-white/5">
+            </section>
+          ) : currentPage.startsWith('rule:') ? (
+            <section className={sectionClass}>
                 <h2 className="text-xl font-semibold mb-3">Rule</h2>
                 <p className="opacity-90 text-lg">{`Rule: ${currentPage.replace('rule:', '') === 'capturing' ? 'Capturing Pokémon' : currentPage.replace('rule:', '') === 'combat' ? 'Combat' : currentPage.replace('rule:', '')}`}</p>
                 <div className="mt-4">
                   <button
-                    onClick={() => setCurrentPage('rules')}
-                    className="rounded-xl px-3 py-1 font-semibold bg-white/10 text-slate-100 hover:bg-white/20"
+                  onClick={() => setCurrentPage('rules')}
+                  className={backButtonClass}
                   >
                     Back to Rules
                   </button>
                 </div>
               </section>
             ) : currentPage === 'classes' ? (
-            <section className="rounded-2xl border border-white/10 p-6 bg-white/5">
+            <section className={sectionClass}>
               <h2 className="text-xl font-semibold mb-3">Trainer Types</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {[
@@ -92,7 +146,7 @@ export default function App() {
                     tabIndex={0}
                     onClick={() => setCurrentPage(`type:${type}`)}
                     onKeyDown={(e) => e.key === 'Enter' && setCurrentPage(`type:${type}`)}
-                    className="rounded-xl border border-white/10 p-4 bg-black/20 hover:bg-black/30 transition-colors cursor-pointer"
+                    className={cardClass}
                   >
                     <h3 className="font-medium">{type}</h3>
                   </div>
@@ -101,13 +155,13 @@ export default function App() {
             </section>
           ) : currentPage.startsWith('type:') ? (
             // Trainer type detail page
-            <section className="rounded-2xl border border-white/10 p-6 bg-white/5">
+            <section className={sectionClass}>
               <h2 className="text-xl font-semibold mb-3">Trainer Type</h2>
               <p className="opacity-90 text-lg">{`Trainer Type: ${currentPage.replace('type:', '')}`}</p>
               <div className="mt-4">
                 <button
                   onClick={() => setCurrentPage('classes')}
-                  className="rounded-xl px-3 py-1 font-semibold bg-white/10 text-slate-100 hover:bg-white/20"
+                  className={backButtonClass}
                 >
                   Back to Types
                 </button>
