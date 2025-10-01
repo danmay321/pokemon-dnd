@@ -5,6 +5,7 @@ interface SidebarProps {
   theme?: 'dark' | 'light';
   isOpen?: boolean;
   onClose?: () => void;
+  // onSelectPokemon removed: sidebar no longer exposes individual pokemon items
 }
 
 export default function Sidebar({ onNavigate, theme = 'dark', isOpen = false, onClose }: SidebarProps) {
@@ -72,6 +73,23 @@ export default function Sidebar({ onNavigate, theme = 'dark', isOpen = false, on
             >
               <div className="font-semibold">Classes</div>
             </div>
+          </li>
+          <li>
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate('pokemon')}
+              onKeyDown={(e) => e.key === 'Enter' && navigate('pokemon')}
+              className={`w-full p-3 rounded-2xl transition-colors cursor-pointer ${
+                activePage === 'pokemon'
+                  ? (theme === 'dark' ? 'bg-black/20 text-slate-100 border-2 border-white/40 shadow-sm' : 'bg-white text-slate-900 border-2 border-black/20 shadow-sm')
+                  : (theme === 'dark' ? 'bg-black/10 text-slate-100 border border-white/5 hover:bg-white/5' : 'bg-white text-slate-900 border border-black/10 hover:bg-gray-100')
+              }`}
+            >
+              <div className="font-semibold">Pokemon</div>
+            </div>
+
+            {/* names intentionally hidden when selecting the Pokemon option */}
           </li>
         </ul>
       </nav>
