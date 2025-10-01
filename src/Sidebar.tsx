@@ -3,23 +3,43 @@ import { useState } from 'react';
 interface SidebarProps {
   onNavigate: (page: string) => void;
   theme?: 'dark' | 'light';
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function Sidebar({ onNavigate, theme = 'dark' }: SidebarProps) {
+export default function Sidebar({ onNavigate, theme = 'dark', isOpen = false, onClose }: SidebarProps) {
   const [activePage, setActivePage] = useState('rules');
 
   const navigate = (page: string) => {
     setActivePage(page);
     onNavigate(page);
+    if (onClose) onClose();
   };
 
   const asideClass = theme === 'dark'
     ? 'w-64 h-screen border-r border-white/10 bg-slate-950 fixed left-0 top-0 transition-colors duration-300'
     : 'w-64 h-screen border-r border-black/10 bg-gray-50 fixed left-0 top-0 transition-colors duration-300';
 
+  // Mobile slide-in classes
+  const mobileClass = isOpen
+    ? 'translate-x-0 visible'
+    : '-translate-x-full invisible md:visible md:translate-x-0';
+
   return (
-    <aside className={asideClass}>
-      <nav className="p-4 pt-20">
+    <aside className={`${asideClass} transform transition-transform duration-300 ${mobileClass}`}>
+      <nav className="p-4 pt-6 md:pt-20">
+        {/* Mobile close button */}
+        <div className="md:hidden mb-4 flex items-center justify-end">
+          <button
+            onClick={() => onClose && onClose()}
+            className="rounded-md p-2 bg-black/10 text-slate-100"
+            aria-label="Close sidebar"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
         {/* Always show both entries with short descriptions */}
         <ul className="space-y-3">
           <li>
