@@ -17,8 +17,8 @@ export default function Sidebar({ onNavigate, theme = 'dark', isOpen = false, on
   };
 
   const asideClass = theme === 'dark'
-    ? 'w-64 h-screen border-r border-white/10 bg-slate-950 fixed left-0 top-0 transition-colors duration-300'
-    : 'w-64 h-screen border-r border-black/10 bg-gray-50 fixed left-0 top-0 transition-colors duration-300';
+    ? 'w-64 h-screen border-r border-white/10 bg-slate-950 fixed left-0 top-0 transition-colors duration-300 z-50'
+    : 'w-64 h-screen border-r border-black/10 bg-gray-50 fixed left-0 top-0 transition-colors duration-300 z-50';
 
   // Mobile slide-in classes
   const mobileClass = isOpen

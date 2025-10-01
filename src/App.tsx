@@ -29,12 +29,15 @@ export default function App() {
   const rootBg = theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-gray-100 text-slate-900';
   const headerBg = theme === 'dark' ? 'bg-slate-950/70 border-white/10' : 'bg-white/80 border-black/10';
   const sectionClass = (theme === 'dark')
-    ? 'rounded-2xl border border-white/10 p-6 bg-white/5 transition-colors duration-300'
-    : 'rounded-2xl border border-black/10 p-6 bg-white transition-colors duration-300';
+    ? 'rounded-2xl border border-white/10 p-4 md:p-6 bg-white/5 transition-colors duration-300 w-full'
+    : 'rounded-2xl border border-black/10 p-4 md:p-6 bg-white transition-colors duration-300 w-full';
 
   const cardClass = (theme === 'dark')
-    ? 'rounded-xl border border-white/10 p-4 bg-black/20 hover:bg-black/30 transition-colors duration-300 cursor-pointer'
-    : 'rounded-xl border border-black/10 p-4 bg-white hover:bg-gray-50 transition-colors duration-300 cursor-pointer';
+    ? 'rounded-xl border border-white/10 p-4 bg-black/20 hover:bg-black/30 transition-colors duration-300 cursor-pointer w-full'
+    : 'rounded-xl border border-black/10 p-4 bg-white hover:bg-gray-50 transition-colors duration-300 cursor-pointer w-full';
+
+  // class to make a section occupy the full mobile viewport (below the header)
+  const mobileFullClass = 'md:relative md:inset-auto md:top-0 md:z-auto md:p-0 fixed inset-0 top-16 z-40 p-0 overflow-auto';
 
   const backButtonClass = theme === 'dark'
     ? 'rounded-xl px-3 py-1 font-semibold bg-white/10 text-slate-100 hover:bg-white/20'
@@ -92,13 +95,13 @@ export default function App() {
       </header>
       
       <main className="ml-64">
-        <div className="max-w-5xl mx-auto px-4 py-8 grid gap-6">
+  <div className="w-full md:max-w-5xl md:mx-auto px-0 md:px-4 py-6 md:py-8 grid gap-6">
           {currentPage === 'rules' ? (
-            <section className={sectionClass}>
+            <section className={`${sectionClass} ${mobileFullClass}`}>
               <h2 className="text-xl font-semibold mb-3">Game Rules</h2>
               <p className="opacity-80 mb-4">Basic rules and guidelines for playing Pokémon in a D&D setting.</p>
 
-              <div className="grid sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   { id: 'capturing', title: 'Capturing Pokémon' },
                   { id: 'combat', title: 'Combat' }
@@ -116,8 +119,8 @@ export default function App() {
                 ))}
               </div>
             </section>
-          ) : currentPage.startsWith('rule:') ? (
-            <section className={sectionClass}>
+            ) : currentPage.startsWith('rule:') ? (
+            <section className={`${sectionClass} ${mobileFullClass}`}>
                 <h2 className="text-xl font-semibold mb-3">Rule</h2>
                 <p className="opacity-90 text-lg">{`Rule: ${currentPage.replace('rule:', '') === 'capturing' ? 'Capturing Pokémon' : currentPage.replace('rule:', '') === 'combat' ? 'Combat' : currentPage.replace('rule:', '')}`}</p>
                 <div className="mt-4">
@@ -130,9 +133,9 @@ export default function App() {
                 </div>
               </section>
             ) : currentPage === 'classes' ? (
-            <section className={sectionClass}>
+            <section className={`${sectionClass} ${mobileFullClass}`}>
               <h2 className="text-xl font-semibold mb-3">Trainer Types</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                 {[
                   'Normal',
                   'Fire',
@@ -168,7 +171,7 @@ export default function App() {
             </section>
           ) : currentPage.startsWith('type:') ? (
             // Trainer type detail page
-            <section className={sectionClass}>
+            <section className={`${sectionClass} ${mobileFullClass}`}> 
               <h2 className="text-xl font-semibold mb-3">Trainer Type</h2>
               <p className="opacity-90 text-lg">{`Trainer Type: ${currentPage.replace('type:', '')}`}</p>
               <div className="mt-4">
