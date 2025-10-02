@@ -28,6 +28,11 @@ export default function App() {
     ? 'rounded-2xl border border-white/10 p-4 md:p-6 bg-white/5 transition-colors duration-300 w-full'
     : 'rounded-2xl border border-black/10 p-4 md:p-6 bg-white transition-colors duration-300 w-full';
 
+  // same section styling but with transparent background so images with alpha show the app background
+  const sectionClassTransparent = (theme === 'dark')
+    ? 'rounded-2xl border border-white/10 p-4 md:p-6 bg-transparent transition-colors duration-300 w-full'
+    : 'rounded-2xl border border-black/10 p-4 md:p-6 bg-transparent transition-colors duration-300 w-full';
+
   const cardClass = (theme === 'dark')
     ? 'rounded-xl border border-white/10 p-4 bg-black/20 hover:bg-black/30 transition-colors duration-300 cursor-pointer w-full'
     : 'rounded-xl border border-black/10 p-4 bg-white hover:bg-gray-50 transition-colors duration-300 cursor-pointer w-full';
@@ -39,6 +44,51 @@ export default function App() {
   const typesList = ['Normal','Fire','Water','Electric','Grass','Ice','Fighting','Poison','Ground','Flying','Psychic','Bug','Rock','Ghost','Dragon','Dark','Steel','Fairy'];
   const rulesList = [{ id: 'capturing', title: 'Capturing Pokémon' }, { id: 'combat', title: 'Combat' }];
 
+  // simple mapping of pokemon slugs to their types (used to colour the image border)
+  const pokemonTypes: Record<string, string[]> = {
+    squirtle: ['Water'],
+    bulbasaur: ['Grass', 'Poison'],
+    charmander: ['Fire'],
+  };
+
+  // map type -> explicit hex color (used for inline gradients)
+  const typeColorMap: Record<string, string> = {
+    Fire: '#fb923c',        // orange-400
+    Water: '#38bdf8',       // sky-400
+    Grass: '#22c55e',       // green-400
+    Electric: '#facc15',    // yellow-400
+    Ice: '#99f6e4',         // cyan-200
+    Fighting: '#fb923c',    // orange-500-ish
+    Poison: '#a78bfa',      // violet-400
+    Ground: '#f59e0b',      // amber-500
+    Flying: '#6366f1',      // indigo-500
+    Psychic: '#f472b6',     // fuchsia-400
+    Bug: '#34d399',         // emerald-400
+    Rock: '#a8a29e',        // stone-400
+    Ghost: '#4338ca',       // indigo-700
+    Dragon: '#7c3aed',      // purple-600
+    Dark: '#334155',        // slate-600
+    Steel: '#9ca3af',       // gray-400
+    Fairy: '#f9a8d4',       // pink-300
+    Normal: '#e6e0d4'
+  };
+
+  // return a tuple of CSS colors [c1, c2] to build an inline linear-gradient
+  const getBorderColors = (slug: string) => {
+    const types = pokemonTypes[slug] || [];
+    if (types.length === 0) return ['#94a3b8', '#94a3b8']; // slate fallback
+    const colors = types.slice(0, 2).map(t => typeColorMap[t] || '#94a3b8');
+    if (colors.length === 1) return [colors[0], colors[0]];
+    return [colors[0], colors[1]];
+  };
+
+  // use a slightly thicker border for dual-type pokemon
+  const borderPadding = (slug: string) => {
+    const types = pokemonTypes[slug] || [];
+    // larger padding for a stronger square border: single-type = 4px, dual-type = 8px
+    return types.length > 1 ? 'p-2' : 'p-1';
+  };
+
   const lower = search.trim().toLowerCase();
   const filteredTypes = lower ? typesList.filter(t => t.toLowerCase().includes(lower)) : typesList;
   const filteredRules = lower ? rulesList.filter(r => r.title.toLowerCase().includes(lower)) : rulesList;
@@ -46,6 +96,9 @@ export default function App() {
 
   // class to make a section occupy the full mobile viewport (below the header)
   const mobileFullClass = 'md:relative md:inset-auto md:top-0 md:z-auto md:p-0 fixed inset-0 top-16 z-40 p-0 overflow-auto';
+
+  const selectedPokemonName = currentPage.startsWith('pokemon:') ? currentPage.replace('pokemon:', '') : '';
+  const selectedPokemonSlug = selectedPokemonName.toLowerCase();
 
   const backButtonClass = theme === 'dark'
     ? 'rounded-xl px-3 py-1 font-semibold bg-white/10 text-slate-100 hover:bg-white/20'
@@ -283,9 +336,34 @@ export default function App() {
               </div>
             </section>
           ) : currentPage.startsWith('pokemon:') ? (
-            <section className={`${sectionClass} ${mobileFullClass}`}>
-              <h2 className="text-xl font-semibold mb-3">Pokémon</h2>
-              <p className="opacity-90 text-lg">{`Pokémon: ${currentPage.replace('pokemon:', '')}`}</p>
+                    <section className={`${sectionClassTransparent} ${mobileFullClass}`}>
+                      <h2 className="text-2xl font-bold mb-6 tracking-tight">{selectedPokemonName}</h2>
+                      <div className="flex items-start gap-4">
+                        {(() => {
+                          const [c1, c2] = getBorderColors(selectedPokemonSlug);
+                          const pad = borderPadding(selectedPokemonSlug);
+                          return (
+                            <div className={pad} style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}>
+                              <div className={`${theme === 'dark' ? 'bg-white/5' : 'bg-black/5'} flex items-center justify-center`} style={{ width: 176, height: 176 }}>
+                                <img
+                                  src={`/pokemon-${selectedPokemonSlug}.png`}
+                                  alt={selectedPokemonName}
+                                  onError={(e: any) => {
+                                    const img = e.currentTarget as HTMLImageElement;
+                                    if (!img.dataset.fallback) {
+                                      img.dataset.fallback = '1';
+                                      img.src = `/pokemon-${selectedPokemonSlug}.svg`;
+                                    }
+                                  }}
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="w-40 h-40 object-contain mix-blend-normal bg-transparent"
+                                />
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
               <div className="mt-4">
                 <button
                   onClick={() => setCurrentPage('pokemon')}
