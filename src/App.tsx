@@ -1,8 +1,38 @@
 import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
+// runtime API base (falls back to localhost:4000)
+const API_BASE = (import.meta.env && import.meta.env.VITE_API_BASE) || 'http://localhost:4000';
 
 export default function App() {
-  const [pokemon] = useState<string[]>(["Squirtle", "Bulbasaur", "Charmander"]);
+  // runtime API base (falls back to localhost:4000)
+  const API_BASE = (import.meta.env && import.meta.env.VITE_API_BASE) || 'http://localhost:4000';
+
+  const titleCase = (s: string) => s ? s.split(/[-_\s]+/).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ') : s;
+
+  const [pokemon, setPokemon] = useState<any[]>([]);
+  const [typesData, setTypesData] = useState<any[]>([]);
+
+  useEffect(() => {
+    // fetch types and pokemon from API on mount
+    (async () => {
+      try {
+        const typesRes = await fetch(`${API_BASE}/api/types`);
+        const typesJson = await typesRes.json();
+        setTypesData(typesJson);
+
+        const pokeRes = await fetch(`${API_BASE}/api/pokemon`);
+        const pokeJson = await pokeRes.json();
+        const mapped = pokeJson.map((p: any) => ({
+          ...p,
+          slug: (p.slug || p.name).toString().toLowerCase(),
+          displayName: titleCase((p.name || p.slug || '').toString())
+        }));
+        setPokemon(mapped);
+      } catch (err) {
+        console.error('Failed to fetch API data', err);
+      }
+    })();
+  }, []);
   const [currentPage, setCurrentPage] = useState("rules");
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
@@ -44,12 +74,23 @@ export default function App() {
   const typesList = ['Normal','Fire','Water','Electric','Grass','Ice','Fighting','Poison','Ground','Flying','Psychic','Bug','Rock','Ghost','Dragon','Dark','Steel','Fairy'];
   const rulesList = [{ id: 'capturing', title: 'Capturing Pokémon' }, { id: 'combat', title: 'Combat' }];
 
-  // simple mapping of pokemon slugs to their types (used to colour the image border)
-  const pokemonTypes: Record<string, string[]> = {
-    squirtle: ['Water'],
-    bulbasaur: ['Grass', 'Poison'],
-    charmander: ['Fire'],
-  };
+  // build id -> name and id -> color maps from typesData
+  const typeIdToName: Record<number, string> = {};
+  const typeIdToColor: Record<number, string> = {};
+  for (const t of typesData) {
+    typeIdToName[t.id] = t.name;
+    typeIdToColor[t.id] = t.color || '#94a3b8';
+  }
+
+  // build a mapping of slug -> type names from the fetched data
+  const pokemonTypes: Record<string, string[]> = {};
+  for (const p of pokemon) {
+    const slug = (p.slug || p.name || '').toString().toLowerCase();
+    const typesArr: string[] = [];
+    if (p.primary_type_id) typesArr.push(typeIdToName[p.primary_type_id]);
+    if (p.secondary_type_id) typesArr.push(typeIdToName[p.secondary_type_id]);
+    pokemonTypes[slug] = typesArr.filter(Boolean) as string[];
+  }
 
   // map type -> explicit hex color (used for inline gradients)
   const typeColorMap: Record<string, string> = {
@@ -76,7 +117,7 @@ export default function App() {
   // return a tuple of CSS colors [c1, c2] to build an inline linear-gradient
   const getBorderColors = (slug: string) => {
     const types = pokemonTypes[slug] || [];
-    if (types.length === 0) return ['#94a3b8', '#94a3b8']; // slate fallback
+    if (types.length === 0) return ['#94a3b8', '#94a3b8'];
     const colors = types.slice(0, 2).map(t => typeColorMap[t] || '#94a3b8');
     if (colors.length === 1) return [colors[0], colors[0]];
     return [colors[0], colors[1]];
@@ -92,13 +133,14 @@ export default function App() {
   const lower = search.trim().toLowerCase();
   const filteredTypes = lower ? typesList.filter(t => t.toLowerCase().includes(lower)) : typesList;
   const filteredRules = lower ? rulesList.filter(r => r.title.toLowerCase().includes(lower)) : rulesList;
-  const filteredPokemon = lower ? pokemon.filter(p => p.toLowerCase().includes(lower)) : pokemon;
+  const filteredPokemon = lower ? pokemon.filter((p) => p.displayName.toLowerCase().includes(lower) || p.slug.toLowerCase().includes(lower)) : pokemon;
 
   // class to make a section occupy the full mobile viewport (below the header)
   const mobileFullClass = 'md:relative md:inset-auto md:top-0 md:z-auto md:p-0 fixed inset-0 top-16 z-40 p-0 overflow-auto';
 
-  const selectedPokemonName = currentPage.startsWith('pokemon:') ? currentPage.replace('pokemon:', '') : '';
-  const selectedPokemonSlug = selectedPokemonName.toLowerCase();
+  const selectedPokemonSlug = currentPage.startsWith('pokemon:') ? currentPage.replace('pokemon:', '') : '';
+  const selectedPokemon = pokemon.find(p => p.slug === selectedPokemonSlug) || null;
+  const selectedPokemonName = selectedPokemon ? selectedPokemon.displayName : '';
 
   const backButtonClass = theme === 'dark'
     ? 'rounded-xl px-3 py-1 font-semibold bg-white/10 text-slate-100 hover:bg-white/20'
@@ -195,8 +237,8 @@ export default function App() {
                 <div>
                   <div className="text-sm font-semibold mb-1">Pokemon</div>
                   <div className="grid gap-2">
-                    {filteredPokemon.map((p, i) => (
-                      <button key={i} onClick={() => { setCurrentPage(`pokemon:${p}`); setSearch(''); }} className={cardClass}>{p}</button>
+                    {filteredPokemon.map((p: any, i: number) => (
+                      <button key={i} onClick={() => { setCurrentPage(`pokemon:${p.slug}`); setSearch(''); }} className={cardClass}>{p.displayName}</button>
                     ))}
                   </div>
                 </div>
@@ -235,8 +277,8 @@ export default function App() {
                   <div>
                     <div className="text-sm font-semibold mb-1">Pokemon</div>
                     <div className="grid gap-2">
-                      {filteredPokemon.map((p, i) => (
-                        <button key={i} onClick={() => { setCurrentPage(`pokemon:${p}`); setSearch(''); }} className={cardClass}>{p}</button>
+                      {filteredPokemon.map((p: any, i: number) => (
+                        <button key={i} onClick={() => { setCurrentPage(`pokemon:${p.slug}`); setSearch(''); }} className={cardClass}>{p.displayName}</button>
                       ))}
                     </div>
                   </div>
@@ -321,16 +363,16 @@ export default function App() {
             <section className={`${sectionClass} ${mobileFullClass}`}>
               <h2 className="text-xl font-semibold mb-3">Available Pokémon</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {pokemon.map((p) => (
+                {pokemon.map((p: any) => (
                   <div
-                    key={p}
+                    key={p.slug}
                     role="button"
                     tabIndex={0}
-                    onClick={() => setCurrentPage(`pokemon:${p}`)}
-                    onKeyDown={(e) => e.key === 'Enter' && setCurrentPage(`pokemon:${p}`)}
+                    onClick={() => setCurrentPage(`pokemon:${p.slug}`)}
+                    onKeyDown={(e) => e.key === 'Enter' && setCurrentPage(`pokemon:${p.slug}`)}
                     className={cardClass}
                   >
-                    <h3 className="font-medium">{p}</h3>
+                    <h3 className="font-medium">{p.displayName}</h3>
                   </div>
                 ))}
               </div>

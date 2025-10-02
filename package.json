@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "serve-api": "node ./server/index.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
+    "better-sqlite3": "^12.4.1",
+    "express": "^4.21.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
