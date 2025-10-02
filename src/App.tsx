@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
-// runtime API base (falls back to localhost:4000)
-const API_BASE = (import.meta.env && import.meta.env.VITE_API_BASE) || 'http://localhost:4000';
 
 export default function App() {
   // runtime API base (falls back to localhost:4000)
