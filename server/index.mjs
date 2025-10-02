@@ -16,6 +16,26 @@ app.use((req, res, next) => {
 const dbPath = path.resolve(process.cwd(), 'data', 'pokemon.db');
 const db = new Database(dbPath, { readonly: true });
 
+// Log incoming requests (helps debug proxy / blocked requests)
+app.use((req, res, next) => {
+  console.log(new Date().toISOString(), req.method, req.url);
+  next();
+});
+
+// sanity check: ensure required tables exist
+try {
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(r => r.name);
+  const missing = [];
+  for (const t of ['types','pokemon']) if (!tables.includes(t)) missing.push(t);
+  if (missing.length) {
+    console.error('Missing expected tables in DB:', missing.join(', '));
+  } else {
+    console.log('DB contains required tables: types, pokemon');
+  }
+} catch (err) {
+  console.error('Error checking DB tables:', err && err.message);
+}
+
 app.get('/api/types', (req, res) => {
   try {
     const rows = db.prepare('SELECT id, name, color FROM types ORDER BY id').all();
@@ -45,8 +65,14 @@ app.get('/api/pokemon/:slug', (req, res) => {
     res.json(row);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to load pokemon' });
+    res.status(500).json({ error: 'Failed to load pokemon', detail: err && err.message });
   }
+});
+
+// global error handler (JSON responses only)
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err && err.stack ? err.stack : err);
+  res.status(500).json({ error: 'Internal server error', detail: err && err.message });
 });
 
 app.listen(port, () => {
