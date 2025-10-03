@@ -2,9 +2,6 @@ import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 
 export default function App() {
-  // runtime API base (falls back to localhost:4000 for dev, use env for production)
-  const API_BASE = (import.meta.env && import.meta.env.VITE_API_BASE) || 'http://localhost:4000';
-
   const titleCase = (s: string) => s ? s.split(/[-_\s]+/).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ') : s;
 
   const [pokemon, setPokemon] = useState<any[]>([]);
@@ -14,11 +11,11 @@ export default function App() {
     // fetch types and pokemon from API on mount
     (async () => {
       try {
-        const typesRes = await fetch(`${API_BASE}/api/types`);
+        const typesRes = await fetch('/api/types');
         const typesJson = await typesRes.json();
         setTypesData(typesJson);
 
-        const pokeRes = await fetch(`${API_BASE}/api/pokemon`);
+        const pokeRes = await fetch('/api/pokemon');
         const pokeJson = await pokeRes.json();
         const mapped = pokeJson.map((p: any) => ({
           ...p,
