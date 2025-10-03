@@ -5,25 +5,11 @@ import path from 'path';
 const app = express();
 const port = process.env.PORT || 4000;
 
-// CORS middleware
+// CORS middleware - allow all origins for now to debug
 app.use((req, res, next) => {
-  // Allow requests from Vercel and localhost for development
-  const allowedOrigins = [
-    'https://pokemon-dnd.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:4000',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:4000'
-  ];
-  
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin) || !origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin || '*');
-  }
-  
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   
   // Handle preflight OPTIONS requests
   if (req.method === 'OPTIONS') {
