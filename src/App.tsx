@@ -1,30 +1,36 @@
 import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
+import { usePokemonData } from "./hooks/usePokemonData";
+import type { PokemonWithDisplay } from "./hooks/usePokemonData";
 
 export default function App() {
   const titleCase = (s: string) => s ? s.split(/[-_\s]+/).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ') : s;
 
-  const [pokemon, setPokemon] = useState<any[]>([]);
+  const rawPokemon = usePokemonData();
+  const [pokemon, setPokemon] = useState<PokemonWithDisplay[]>([]);
   const [typesData, setTypesData] = useState<any[]>([]);
 
+  // Process raw pokemon data into display format
   useEffect(() => {
-    // fetch types and pokemon from API on mount
+    if (rawPokemon.length > 0) {
+      const mapped: PokemonWithDisplay[] = rawPokemon.map((p) => ({
+        ...p,
+        slug: (p.slug || p.name).toString().toLowerCase(),
+        displayName: titleCase((p.name || p.slug || '').toString())
+      }));
+      setPokemon(mapped);
+    }
+  }, [rawPokemon]);
+
+  useEffect(() => {
+    // fetch types from API on mount
     (async () => {
       try {
         const typesRes = await fetch('/api/types');
         const typesJson = await typesRes.json();
         setTypesData(typesJson);
-
-        const pokeRes = await fetch('/api/pokemon');
-        const pokeJson = await pokeRes.json();
-        const mapped = pokeJson.map((p: any) => ({
-          ...p,
-          slug: (p.slug || p.name).toString().toLowerCase(),
-          displayName: titleCase((p.name || p.slug || '').toString())
-        }));
-        setPokemon(mapped);
       } catch (err) {
-        console.error('Failed to fetch API data', err);
+        console.error('Failed to fetch types data', err);
       }
     })();
   }, []);
@@ -134,7 +140,7 @@ export default function App() {
   const mobileFullClass = 'md:relative md:inset-auto md:top-0 md:z-auto md:p-0 fixed inset-0 top-16 z-40 p-0 overflow-auto';
 
   const selectedPokemonSlug = currentPage.startsWith('pokemon:') ? currentPage.replace('pokemon:', '') : '';
-  const selectedPokemon = pokemon.find(p => p.slug === selectedPokemonSlug) || null;
+  const selectedPokemon: PokemonWithDisplay | null = pokemon.find(p => p.slug === selectedPokemonSlug) || null;
   const selectedPokemonName = selectedPokemon ? selectedPokemon.displayName : '';
 
   const backButtonClass = theme === 'dark'

@@ -20,6 +20,12 @@ export interface Pokemon {
   ground_speed?: number;
   swimming_speed?: number;
   flying_speed?: number;
+  evolves_to_id?: number | null;
+  created_at?: string;
+}
+
+export interface PokemonWithDisplay extends Pokemon {
+  displayName: string;
 }
 
 export function usePokemonData() {
@@ -29,11 +35,13 @@ export function usePokemonData() {
       try {
         const res = await fetch("/api/pokemon");
         const data = await res.json();
+        console.log('[DEBUG] fetched pokemon data:', data);
         setPokemon(data);
       } catch (err) {
         console.error("Failed to fetch pokemon data", err);
       }
     })();
   }, []);
+  console.log('[DEBUG] usePokemonData returning:', pokemon);
   return pokemon;
 }
