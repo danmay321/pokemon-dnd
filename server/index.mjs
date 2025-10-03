@@ -1,6 +1,7 @@
 import express from 'express';
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -23,7 +24,7 @@ app.use((req, res, next) => {
 const dbPath = path.resolve(process.cwd(), 'data', 'pokemon.db');
 console.log('Looking for DB at:', dbPath);
 console.log('Current working directory:', process.cwd());
-console.log('Directory contents:', require('fs').readdirSync(process.cwd()));
+console.log('Directory contents:', fs.readdirSync(process.cwd()));
 
 let db;
 try {
