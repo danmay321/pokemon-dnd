@@ -67,7 +67,7 @@ export default function App() {
     : 'rounded-xl bg-white border border-black/10 px-3 py-2 outline-none text-slate-900 placeholder-slate-500 focus:ring-2 ring-[hsl(var(--brand))]';
 
   const typesList = ['Normal','Fire','Water','Electric','Grass','Ice','Fighting','Poison','Ground','Flying','Psychic','Bug','Rock','Ghost','Dragon','Dark','Steel','Fairy'];
-  const rulesList = [{ id: 'capturing', title: 'Capturing Pokémon' }, { id: 'combat', title: 'Combat' }];
+  const rulesList = [{ id: 'capturing', title: 'Capturing Pokémon' }, { id: 'combat', title: 'Combat' }, { id: 'character', title: 'Creating a Character' }];
 
   // build id -> name and id -> color maps from typesData
   const typeIdToName: Record<number, string> = {};
@@ -312,7 +312,11 @@ export default function App() {
             ) : currentPage.startsWith('rule:') ? (
             <section className={`${sectionClass} ${mobileFullClass}`}>
                 <h2 className="text-xl font-semibold mb-3">Rule</h2>
-                <p className="opacity-90 text-lg">{`Rule: ${currentPage.replace('rule:', '') === 'capturing' ? 'Capturing Pokémon' : currentPage.replace('rule:', '') === 'combat' ? 'Combat' : currentPage.replace('rule:', '')}`}</p>
+                <p className="opacity-90 text-lg">{`Rule: ${(() => {
+                  const ruleId = currentPage.replace('rule:', '');
+                  const rule = rulesList.find(r => r.id === ruleId);
+                  return rule ? rule.title : ruleId;
+                })()}`}</p>
                 <div className="mt-4">
                   <button
                   onClick={() => setCurrentPage('rules')}
@@ -401,6 +405,64 @@ export default function App() {
                           );
                         })()}
                       </div>
+
+                      {/* Stats Table */}
+                      <div className="mt-6">
+                        <h3 className="text-lg font-semibold mb-3">Stats</h3>
+                        <div className="overflow-x-auto">
+                          <table className={`w-full ${theme === 'dark' ? 'text-slate-100' : 'text-slate-900'} border-collapse`}>
+                            <thead>
+                              <tr className={`${theme === 'dark' ? 'border-white/10' : 'border-black/10'} border-b`}>
+                                <th className="text-left py-2 px-3 font-medium">Stat</th>
+                                <th className="text-left py-2 px-3 font-medium">Value</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr className={`${theme === 'dark' ? 'border-white/5 hover:bg-white/5' : 'border-black/5 hover:bg-black/5'} border-b`}>
+                                <td className="py-2 px-3 font-medium">Armor Class</td>
+                                  <td className="py-2 px-3">{selectedPokemon?.armor_class ?? 10}</td>
+                              </tr>
+                                <tr className={`${theme === 'dark' ? 'border-white/5 hover:bg-white/5' : 'border-black/5 hover:bg-black/5'} border-b`}>
+                                  <td className="py-2 px-3 font-medium">Ground Speed</td>
+                                  <td className="py-2 px-3">{selectedPokemon?.ground_speed ?? 0} ft.</td>
+                                </tr>
+                                <tr className={`${theme === 'dark' ? 'border-white/5 hover:bg-white/5' : 'border-black/5 hover:bg-black/5'} border-b`}>
+                                  <td className="py-2 px-3 font-medium">Swimming Speed</td>
+                                  <td className="py-2 px-3">{selectedPokemon?.swimming_speed ?? 0} ft.</td>
+                                </tr>
+                                <tr className={`${theme === 'dark' ? 'border-white/5 hover:bg-white/5' : 'border-black/5 hover:bg-black/5'} border-b`}>
+                                  <td className="py-2 px-3 font-medium">Flying Speed</td>
+                                  <td className="py-2 px-3">{selectedPokemon?.flying_speed ?? 0} ft.</td>
+                                </tr>
+                              <tr className={`${theme === 'dark' ? 'border-white/5 hover:bg-white/5' : 'border-black/5 hover:bg-black/5'} border-b`}>
+                                <td className="py-2 px-3 font-medium">Strength</td>
+                                <td className="py-2 px-3">{selectedPokemon?.base_strength || 0} ({Math.floor((selectedPokemon?.base_strength || 0) / 2) - 5 >= 0 ? '+' : ''}{Math.floor((selectedPokemon?.base_strength || 0) / 2) - 5})</td>
+                              </tr>
+                              <tr className={`${theme === 'dark' ? 'border-white/5 hover:bg-white/5' : 'border-black/5 hover:bg-black/5'} border-b`}>
+                                <td className="py-2 px-3 font-medium">Dexterity</td>
+                                <td className="py-2 px-3">{selectedPokemon?.base_dexterity || 0} ({Math.floor((selectedPokemon?.base_dexterity || 0) / 2) - 5 >= 0 ? '+' : ''}{Math.floor((selectedPokemon?.base_dexterity || 0) / 2) - 5})</td>
+                              </tr>
+                              <tr className={`${theme === 'dark' ? 'border-white/5 hover:bg-white/5' : 'border-black/5 hover:bg-black/5'} border-b`}>
+                                <td className="py-2 px-3 font-medium">Constitution</td>
+                                <td className="py-2 px-3">{selectedPokemon?.base_constitution || 0} ({Math.floor((selectedPokemon?.base_constitution || 0) / 2) - 5 >= 0 ? '+' : ''}{Math.floor((selectedPokemon?.base_constitution || 0) / 2) - 5})</td>
+                              </tr>
+                              <tr className={`${theme === 'dark' ? 'border-white/5 hover:bg-white/5' : 'border-black/5 hover:bg-black/5'} border-b`}>
+                                <td className="py-2 px-3 font-medium">Intelligence</td>
+                                <td className="py-2 px-3">{selectedPokemon?.base_intelligence || 0} ({Math.floor((selectedPokemon?.base_intelligence || 0) / 2) - 5 >= 0 ? '+' : ''}{Math.floor((selectedPokemon?.base_intelligence || 0) / 2) - 5})</td>
+                              </tr>
+                              <tr className={`${theme === 'dark' ? 'border-white/5 hover:bg-white/5' : 'border-black/5 hover:bg-black/5'} border-b`}>
+                                <td className="py-2 px-3 font-medium">Wisdom</td>
+                                <td className="py-2 px-3">{selectedPokemon?.base_wisdom || 0} ({Math.floor((selectedPokemon?.base_wisdom || 0) / 2) - 5 >= 0 ? '+' : ''}{Math.floor((selectedPokemon?.base_wisdom || 0) / 2) - 5})</td>
+                              </tr>
+                              <tr className={`${theme === 'dark' ? 'border-white/5 hover:bg-white/5' : 'border-black/5 hover:bg-black/5'}`}>
+                                <td className="py-2 px-3 font-medium">Charisma</td>
+                                <td className="py-2 px-3">{selectedPokemon?.base_charisma || 0} ({Math.floor((selectedPokemon?.base_charisma || 0) / 2) - 5 >= 0 ? '+' : ''}{Math.floor((selectedPokemon?.base_charisma || 0) / 2) - 5})</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
               <div className="mt-4">
                 <button
                   onClick={() => setCurrentPage('pokemon')}
