@@ -21,7 +21,19 @@ app.use((req, res, next) => {
 });
 
 const dbPath = path.resolve(process.cwd(), 'data', 'pokemon.db');
-const db = new Database(dbPath, { readonly: true });
+console.log('Looking for DB at:', dbPath);
+console.log('Current working directory:', process.cwd());
+console.log('Directory contents:', require('fs').readdirSync(process.cwd()));
+
+let db;
+try {
+  db = new Database(dbPath, { readonly: true });
+  console.log('Database opened successfully');
+} catch (err) {
+  console.error('Failed to open database:', err.message);
+  console.error('This is likely why the server is failing');
+  process.exit(1); // Exit with error so Railway knows deployment failed
+}
 
 // Log incoming requests (helps debug proxy / blocked requests)
 app.use((req, res, next) => {
