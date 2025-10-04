@@ -1,18 +1,26 @@
-import { useState } from 'react';
+
 
 interface SidebarProps {
   onNavigate: (page: string) => void;
   theme?: 'dark' | 'light';
   isOpen?: boolean;
   onClose?: () => void;
+  currentPage?: string;
   // onSelectPokemon removed: sidebar no longer exposes individual pokemon items
 }
 
-export default function Sidebar({ onNavigate, theme = 'dark', isOpen = false, onClose }: SidebarProps) {
-  const [activePage, setActivePage] = useState('rules');
+export default function Sidebar({ onNavigate, theme = 'dark', isOpen = false, onClose, currentPage = 'rules' }: SidebarProps) {
+  // Determine which sidebar item should be active based on current page
+  const getActiveSidebarItem = (page: string) => {
+    if (page.startsWith('rule:') || page === 'rules') return 'rules';
+    if (page.startsWith('type:') || page === 'classes') return 'classes';
+    if (page.startsWith('pokemon:') || page === 'pokemon') return 'pokemon';
+    return 'rules'; // fallback
+  };
+
+  const activeSidebarItem = getActiveSidebarItem(currentPage);
 
   const navigate = (page: string) => {
-    setActivePage(page);
     onNavigate(page);
     if (onClose) onClose();
   };
@@ -50,7 +58,7 @@ export default function Sidebar({ onNavigate, theme = 'dark', isOpen = false, on
               onClick={() => navigate('rules')}
               onKeyDown={(e) => e.key === 'Enter' && navigate('rules')}
               className={`w-full p-3 rounded-2xl transition-colors cursor-pointer ${
-                activePage === 'rules'
+                activeSidebarItem === 'rules'
                   ? (theme === 'dark' ? 'bg-black/20 text-slate-100 border-2 border-white/40 shadow-sm' : 'bg-white text-slate-900 border-2 border-black/20 shadow-sm')
                   : (theme === 'dark' ? 'bg-black/10 text-slate-100 border border-white/5 hover:bg-white/5' : 'bg-white text-slate-900 border border-black/10 hover:bg-gray-100')
               }`}
@@ -66,7 +74,7 @@ export default function Sidebar({ onNavigate, theme = 'dark', isOpen = false, on
               onClick={() => navigate('classes')}
               onKeyDown={(e) => e.key === 'Enter' && navigate('classes')}
               className={`w-full p-3 rounded-2xl transition-colors cursor-pointer ${
-                activePage === 'classes'
+                activeSidebarItem === 'classes'
                   ? (theme === 'dark' ? 'bg-black/20 text-slate-100 border-2 border-white/40 shadow-sm' : 'bg-white text-slate-900 border-2 border-black/20 shadow-sm')
                   : (theme === 'dark' ? 'bg-black/10 text-slate-100 border border-white/5 hover:bg-white/5' : 'bg-white text-slate-900 border border-black/10 hover:bg-gray-100')
               }`}
@@ -81,7 +89,7 @@ export default function Sidebar({ onNavigate, theme = 'dark', isOpen = false, on
               onClick={() => navigate('pokemon')}
               onKeyDown={(e) => e.key === 'Enter' && navigate('pokemon')}
               className={`w-full p-3 rounded-2xl transition-colors cursor-pointer ${
-                activePage === 'pokemon'
+                activeSidebarItem === 'pokemon'
                   ? (theme === 'dark' ? 'bg-black/20 text-slate-100 border-2 border-white/40 shadow-sm' : 'bg-white text-slate-900 border-2 border-black/20 shadow-sm')
                   : (theme === 'dark' ? 'bg-black/10 text-slate-100 border border-white/5 hover:bg-white/5' : 'bg-white text-slate-900 border border-black/10 hover:bg-gray-100')
               }`}

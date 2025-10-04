@@ -35,13 +35,11 @@ export function usePokemonData() {
       try {
         const res = await fetch("/api/pokemon");
         const data = await res.json();
-        console.log('[DEBUG] fetched pokemon data:', data);
         setPokemon(data);
       } catch (err) {
-        console.error("Failed to fetch pokemon data", err);
+        console.error('[DEBUG] failed to fetch pokemon data:', err);
       }
     })();
   }, []);
-  console.log('[DEBUG] usePokemonData returning:', pokemon);
   return pokemon;
 }

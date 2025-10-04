@@ -2,6 +2,7 @@ import React from "react";
 
 export interface StatsTableProps {
   armorClass?: number;
+  hitPoints?: number;
   groundSpeed?: number;
   swimmingSpeed?: number;
   flyingSpeed?: number;
@@ -32,8 +33,27 @@ function formatAbilityScore(score: number | undefined): string {
   return `${score} (${getModifier(score)})`;
 }
 
+function formatCombinedSpeed(groundSpeed?: number, swimmingSpeed?: number, flyingSpeed?: number): string {
+  const speeds: string[] = [];
+  
+  if (groundSpeed && groundSpeed > 0) {
+    speeds.push(`${groundSpeed} ft.`);
+  }
+  
+  if (swimmingSpeed && swimmingSpeed > 0) {
+    speeds.push(`swim ${swimmingSpeed} ft.`);
+  }
+  
+  if (flyingSpeed && flyingSpeed > 0) {
+    speeds.push(`fly ${flyingSpeed} ft.`);
+  }
+  
+  return speeds.length > 0 ? speeds.join(", ") : "UNDEFINED";
+}
+
 export const StatsTable: React.FC<StatsTableProps> = ({
   armorClass,
+  hitPoints,
   groundSpeed,
   swimmingSpeed,
   flyingSpeed,
@@ -45,55 +65,38 @@ export const StatsTable: React.FC<StatsTableProps> = ({
   baseCharisma,
 }) => (
   <div className="mt-6">
-    <h3 className="text-lg font-semibold mb-3">Stats</h3>
+    
+    {/* Combat Stats */}
+    <div className="mb-4 space-y-1">
+      <div className="text-lg">
+        <span className="font-medium">Armor Class</span> {formatValue(armorClass)}
+      </div>
+      <div className="text-lg">
+        <span className="font-medium">Hit Points</span> {formatValue(hitPoints)}
+      </div>
+      <div className="text-lg">
+        <span className="font-medium">Speed</span> {formatCombinedSpeed(groundSpeed, swimmingSpeed, flyingSpeed)}
+      </div>
+    </div>
+
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-b">
-            <th className="text-left py-2 px-3 font-medium">Stat</th>
-            <th className="text-left py-2 px-3 font-medium">Value</th>
-          </tr>
-        </thead>
+      <table className="max-w-sm border-collapse">
         <tbody>
           <tr className="border-b">
-            <td className="py-2 px-3 font-medium">Armor Class</td>
-            <td className="py-2 px-3">{formatValue(armorClass)}</td>
-          </tr>
-          <tr className="border-b">
-            <td className="py-2 px-3 font-medium">Ground Speed</td>
-            <td className="py-2 px-3">{formatValue(groundSpeed, "ft.")}</td>
-          </tr>
-          <tr className="border-b">
-            <td className="py-2 px-3 font-medium">Swimming Speed</td>
-            <td className="py-2 px-3">{formatValue(swimmingSpeed, "ft.")}</td>
-          </tr>
-          <tr className="border-b">
-            <td className="py-2 px-3 font-medium">Flying Speed</td>
-            <td className="py-2 px-3">{formatValue(flyingSpeed, "ft.")}</td>
-          </tr>
-          <tr className="border-b">
-            <td className="py-2 px-3 font-medium">Strength</td>
-            <td className="py-2 px-3">{formatAbilityScore(baseStrength)}</td>
-          </tr>
-          <tr className="border-b">
-            <td className="py-2 px-3 font-medium">Dexterity</td>
-            <td className="py-2 px-3">{formatAbilityScore(baseDexterity)}</td>
-          </tr>
-          <tr className="border-b">
-            <td className="py-2 px-3 font-medium">Constitution</td>
-            <td className="py-2 px-3">{formatAbilityScore(baseConstitution)}</td>
-          </tr>
-          <tr className="border-b">
-            <td className="py-2 px-3 font-medium">Intelligence</td>
-            <td className="py-2 px-3">{formatAbilityScore(baseIntelligence)}</td>
-          </tr>
-          <tr className="border-b">
-            <td className="py-2 px-3 font-medium">Wisdom</td>
-            <td className="py-2 px-3">{formatAbilityScore(baseWisdom)}</td>
+            <td className="py-2 px-3 font-medium text-center border-r border-white/10">STR</td>
+            <td className="py-2 px-3 font-medium text-center border-r border-white/10">DEX</td>
+            <td className="py-2 px-3 font-medium text-center border-r border-white/10">CON</td>
+            <td className="py-2 px-3 font-medium text-center border-r border-white/10">INT</td>
+            <td className="py-2 px-3 font-medium text-center border-r border-white/10">WIS</td>
+            <td className="py-2 px-3 font-medium text-center">CHA</td>
           </tr>
           <tr>
-            <td className="py-2 px-3 font-medium">Charisma</td>
-            <td className="py-2 px-3">{formatAbilityScore(baseCharisma)}</td>
+            <td className="py-2 px-3 text-center border-r border-white/10">{formatAbilityScore(baseStrength)}</td>
+            <td className="py-2 px-3 text-center border-r border-white/10">{formatAbilityScore(baseDexterity)}</td>
+            <td className="py-2 px-3 text-center border-r border-white/10">{formatAbilityScore(baseConstitution)}</td>
+            <td className="py-2 px-3 text-center border-r border-white/10">{formatAbilityScore(baseIntelligence)}</td>
+            <td className="py-2 px-3 text-center border-r border-white/10">{formatAbilityScore(baseWisdom)}</td>
+            <td className="py-2 px-3 text-center">{formatAbilityScore(baseCharisma)}</td>
           </tr>
         </tbody>
       </table>
